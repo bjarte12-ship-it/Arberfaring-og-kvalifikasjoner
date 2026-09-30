@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nb"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flashcards: Arbeidserfaring og kvalifikasjoner</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f1f5f9;--fg:#12324a;--mut:#64748b;--card:#fff;--back:#12324a;--backfg:#fff;--acc:#e2711d;--teal:#0f7f7f;--chip:#e2e8f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1b26;--fg:#e8f0f6;--mut:#94a3b8;--card:#17303f;--back:#0f7f7f;--chip:#1f3a4b}}
+:root[data-theme="dark"]{--bg:#0d1b26;--fg:#e8f0f6;--mut:#94a3b8;--card:#17303f;--back:#0f7f7f;--chip:#1f3a4b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px}
+h1{font-size:1.3rem;margin:4px 0 2px}
+.sub{color:var(--mut);font-size:.9rem;margin:0 0 14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;max-width:560px}
+.chip{border:0;background:var(--chip);color:var(--fg);padding:8px 14px;border-radius:99px;font-size:.85rem;cursor:pointer;font-weight:600}
+.chip.on{background:var(--acc);color:#fff}
+.bar{width:100%;max-width:420px;height:6px;background:var(--chip);border-radius:9px;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;background:var(--teal);transition:width .3s}
+.count{font-size:.8rem;color:var(--mut);margin-bottom:14px}
+.scene{width:100%;max-width:420px;height:320px;perspective:1200px;cursor:pointer}
+.card{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.card.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 18px 40px -12px rgba(18,50,74,.35)}
+.front{background:var(--card)}
+.backf{background:var(--back);color:var(--backfg);transform:rotateY(180deg)}
+.tag{position:absolute;top:18px;left:20px;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--acc)}
+.backf .tag{color:#fcd9b8}
+.term{font-size:2rem;font-weight:800;line-height:1.15}
+.hint{position:absolute;bottom:16px;font-size:.75rem;color:var(--mut)}
+.def{font-size:1.25rem;font-weight:600;margin:0 0 14px}
+.ex{font-size:1rem;opacity:.9;font-style:italic;margin:0}
+.btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;justify-content:center}
+.btn{border:0;padding:12px 20px;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--fg);box-shadow:0 4px 12px -4px rgba(0,0,0,.25)}
+.btn.p{background:var(--acc);color:#fff}
+</style></head><body>
+<h1>Arbeidserfaring og kvalifikasjoner</h1>
+<p class="sub">Trykk på kortet for å snu det</p>
+<div class="chips" id="chips"></div>
+<div class="bar"><i id="pb"></i></div>
+<div class="count" id="ct"></div>
+<div class="scene" id="scene"><div class="card" id="card">
+<div class="face front"><span class="tag" id="t1"></span><div class="term" id="term"></div><span class="hint">Trykk for å se svaret</span></div>
+<div class="face backf"><span class="tag" id="t2"></span><p class="def" id="def"></p><p class="ex" id="ex"></p></div>
+</div></div>
+<div class="btns"><button class="btn" id="prev">← Forrige</button><button class="btn" id="shuf">Bland</button><button class="btn p" id="next">Neste →</button></div>
+<script>
+var D=[
+["Ord om jobb","arbeidserfaring","Du har gjort jobben før.","Samuel har tre års erfaring fra matbutikk."],
+["Ord om jobb","erfaring","Du har gjort lignende oppgaver før.","Jeg har erfaring fra butikk."],
+["Ord om jobb","praksis","Du jobber en periode for å lære.","Samuel hadde praksis i ett år."],
+["Ord om jobb","frivillig arbeid","Du jobber uten å få lønn.","Hun gjør frivillig arbeid på en skole."],
+["Ord om jobb","arbeidsgiver","Personen eller firmaet som ansetter deg.","Arbeidsgiveren vil ha en person med erfaring."],
+["Ord om jobb","å ansette","Å gi en person en jobb.","Butikken ansetter Samuel."],
+["Ord om jobb","en arbeidsoppgave","Noe du gjør på jobben.","En arbeidsoppgave er å rydde lageret."],
+["Kvalifikasjoner","en kvalifikasjon","Noe du kan eller har lært.","Fagbrev er en kvalifikasjon."],
+["Kvalifikasjoner","kvalifisert","Du har det jobben spør etter.","Er du kvalifisert til jobben?"],
+["Kvalifikasjoner","utdanning","Skole, fagbrev og kurs.","Jeg har utdanning fra videregående."],
+["Kvalifikasjoner","et fagbrev","Et bevis på at du er fagarbeider.","Han har fagbrev som elektriker."],
+["Kvalifikasjoner","datakunnskaper","Å kunne bruke data.","Jeg har gode datakunnskaper."],
+["Kvalifikasjoner","å ha førerkort","Du har lov til å kjøre bil.","En bussjåfør må ha førerkort."],
+["Kvalifikasjoner","å ha godkjent helseattest","Legen sier at du er frisk nok til jobben.","Jeg har godkjent helseattest."],
+["Kvalifikasjoner","å skrive rapporter","Å skrive om det du har gjort på jobb.","Helsefagarbeideren skriver rapporter."],
+["Kvalifikasjoner","å ta en blodprøve","Å ta litt blod for å sjekke helsen.","Sykepleieren tar en blodprøve."],
+["Arbeidsoppgaver","å hjelpe kunder","Å vise kunden riktig vare.","Samuel hjelper kunder i butikken."],
+["Arbeidsoppgaver","å sitte i kassa","Å ta betalt av kundene.","Hun sitter i kassa om morgenen."],
+["Arbeidsoppgaver","å sette varer i hyllene","Å legge varer på rett plass.","Vi setter varer i hyllene."],
+["Arbeidsoppgaver","å ta imot varer","Å hente varer når bilen kommer.","Jeg tar imot varer på lageret."],
+["Arbeidsoppgaver","å bestille varer","Å be om nye varer fra lageret eller fra en leverandør.","Han bestiller melk og brød."],
+["Arbeidsoppgaver","å tømme flaskeautomaten","Å ta ut flasker fra maskinen.","Om kvelden tømmer jeg flaskeautomaten."],
+["Arbeidsoppgaver","å sjekke temperaturen i kjøledisken","Å se at maten er kald nok.","Vi sjekker temperaturen hver dag."],
+["Arbeidsoppgaver","å sette på alarmen","Å slå på alarmen når butikken er stengt.","Sist på dagen setter jeg på alarmen."],
+["Egenskaper","en egenskap","Hvordan du er som person.","Å være tålmodig er en egenskap."],
+["Egenskaper","å være tålmodig","Du kan vente uten å bli sint.","En lærer må være tålmodig."],
+["Egenskaper","å være omsorgsfull","Du bryr deg om andre.","En helsefagarbeider er omsorgsfull."],
+["Egenskaper","å være nøyaktig","Du gjør ting riktig og ordentlig.","En baker må være nøyaktig."],
+["Egenskaper","å være effektiv","Du gjør jobben fort og bra.","Bakeren er effektiv om morgenen."],
+["Egenskaper","å være ansvarsbevisst","Du gjør det du skal gjøre.","Jeg er ansvarsbevisst og kommer tidlig."],
+["Egenskaper","å være serviceinnstilt","Du vil gjerne hjelpe kunden.","En kundebehandler er serviceinnstilt."],
+["Yrker","en helsefagarbeider","Hjelper syke og eldre mennesker.","Helsefagarbeideren gir god pleie."],
+["Yrker","en elektriker","Jobber med strøm og elektriske anlegg.","Elektrikeren jobber ved sikringsskapet."],
+["Yrker","en kundebehandler","Snakker med kunder og hjelper dem.","En kundebehandler snakker godt norsk."],
+["Yrker","en baker","Lager brød og kaker.","Bakeren står opp tidlig."]
+];
+var cats=["Alle"].concat(D.map(function(d){return d[0]}).filter(function(v,i,a){return a.indexOf(v)===i}));
+var cur="Alle",deck=[],i=0;
+var $=function(id){return document.getElementById(id)};
+function build(){deck=D.filter(function(d){return cur==="Alle"||d[0]===cur});i=0;show()}
+function show(){var d=deck[i];$("card").classList.remove("flip");
+setTimeout(function(){$("t1").textContent=d[0];$("t2").textContent=d[0];$("term").textContent=d[1];$("def").textContent=d[2];$("ex").textContent="«"+d[3]+"»"},i>=0?120:0);
+$("ct").textContent=(i+1)+" / "+deck.length;$("pb").style.width=((i+1)/deck.length*100)+"%"}
+function chips(){$("chips").innerHTML="";cats.forEach(function(c){var b=document.createElement("button");b.className="chip"+(c===cur?" on":"");b.textContent=c;b.onclick=function(){cur=c;chips();build()};$("chips").appendChild(b)})}
+$("scene").onclick=function(){$("card").classList.toggle("flip")};
+$("next").onclick=function(){i=(i+1)%deck.length;show()};
+$("prev").onclick=function(){i=(i-1+deck.length)%deck.length;show()};
+$("shuf").onclick=function(){for(var k=deck.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=deck[k];deck[k]=deck[j];deck[j]=t}i=0;show()};
+chips();build();
+</script></body></html>
